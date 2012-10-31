@@ -1,7 +1,7 @@
 from .test_utils import TestCase
-from infi.conf import Config
-from infi.conf import get_config_object_from_proxy
-from infi.conf import exceptions
+from confetti import Config
+from confetti import get_config_object_from_proxy
+from confetti import exceptions
 
 class BasicUsageTest(TestCase):
     def setUp(self):

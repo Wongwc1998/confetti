@@ -1,7 +1,7 @@
 from .test_utils import TestCase
-from infi.conf import Config
-from infi.conf import utils
-from infi.conf import exceptions
+from confetti import Config
+from confetti import utils
+from confetti import exceptions
 
 class PathAssignmentTest(TestCase):
     def setUp(self):
