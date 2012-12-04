@@ -1,15 +1,17 @@
 import copy
 from sentinels import NOTHING
 from . import exceptions
+from .ref import Ref
 from .python3_compat import iteritems
 
 class Config(object):
     _backups = None
-    def __init__(self, value=None):
+    def __init__(self, value=None, parent=None):
         super(Config, self).__init__()
         if value is None:
             value = {}
         self._value = value
+        self._parent = parent
         self.root = ConfigProxy(self)
     def is_leaf(self):
         if isinstance(self._value, Config):
@@ -19,8 +21,10 @@ class Config(object):
         returned = self._value[item]
         if isinstance(returned, Config) and returned.is_leaf():
             returned = returned._value
+        if isinstance(returned, Ref):
+            returned = returned.resolve(self)
         if isinstance(returned, dict):
-            return Config(returned)
+            return Config(returned, parent=self)
         return returned
     def __contains__(self, key):
         return self.get(key, NOTHING) is not NOTHING
@@ -64,6 +68,8 @@ class Config(object):
         _set_state(self, self._backups.pop())
     def serialize_to_dict(self):
         return _get_state(self)
+    def get_parent(self):
+        return self._parent
 
 class ConfigProxy(object):
     def __init__(self, conf):

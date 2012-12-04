@@ -26,6 +26,45 @@ Obtaining a configuration object is done via::
  >>> c.root.a.b
  2
 
+Cross References
+================
+
+In many cases you want to set a single value in your configuration, and have other leaves take it by default. Instead of repeating yourself like so::
+
+ >>> cfg = Config(dict(
+ ...     my_value = 1337,
+ ...     value_1 = 1337,
+ ...     x = dict(
+ ...         y = dict(
+ ...             z = 1337,
+ ...         )
+ ...     )
+ ... ))
+
+You can do this:
+
+ >>> from confetti import Ref
+ >>> cfg = Config(dict(
+ ...     my_value = 1337,
+ ...     value_1 = Ref(".my_value"),
+ ...     x = dict(
+ ...         y = dict(
+ ...             z = Ref("...my_value"),
+ ...         )
+ ...     )
+ ... ))
+ >>> cfg.root.x.y.z
+ 1337
+
+Or you can apply a custom filter to the reference, to create derived values::
+
+ >>> cfg = Config(dict(
+ ...     my_value = 1337,
+ ...     value_1 = Ref(".my_value", filter="I am {0}".format),
+ ... ))
+ >>> cfg.root.value_1
+ 'I am 1337'
+
 Loading From Other Sources
 ==========================
 

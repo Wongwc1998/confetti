@@ -10,5 +10,8 @@ class InvalidPath(ConfigException):
 class CannotDeduceType(ConfigException):
     pass
 
+class CannotResolveError(ConfigException):
+    pass
+
 class NoBackup(ConfigException):
     pass
