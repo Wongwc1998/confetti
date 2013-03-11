@@ -6,12 +6,13 @@ from .python3_compat import iteritems
 
 class Config(object):
     _backups = None
-    def __init__(self, value=None, parent=None):
+    def __init__(self, value=None, parent=None, metadata=None):
         super(Config, self).__init__()
         self._value = self._init_value(value)
         if isinstance(self._value, dict):
             self._fix_dictionary_value()
         self._parent = parent
+        self.metadata = metadata
         self.root = ConfigProxy(self)
     def _init_value(self, value):
         if value is None:
@@ -39,7 +40,15 @@ class Config(object):
     def __contains__(self, key):
         return self.get(key, NOTHING) is not NOTHING
     def get(self, key, default=None):
-        return self._value.get(key, default)
+        try:
+            return self[key]
+        except KeyError:
+            return default
+    def get_config(self, key):
+        returned = self._value[key]
+        if not isinstance(returned, Config):
+            returned = Config(returned, parent=self)
+        return returned
     def pop(self, key):
         return self._value.pop(key)
     def __setitem__(self, item, value):

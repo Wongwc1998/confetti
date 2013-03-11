@@ -123,6 +123,35 @@ Whenever you want to preserve the configuration prior to a change and restore it
  >>> c['value']
  2
 
+Metadata
+========
+
+You can store metadata on config variables and paths. This is useful for documenting paths or for attaching arbitrary information::
+
+ >>> from confetti import Metadata
+ >>> c = Config({
+ ...     "key" : "value" // Metadata(some_key="some_value"),
+ ...     })
+
+It can later be retrieved::
+
+ >>> c.get_config("key").metadata
+ {'some_key': 'some_value'}
+
+Metadata can also be attached to config branches::
+
+ >>> c = Config({
+ ...     "key" : {
+ ...         "a" : 1,
+ ...         "b" : 2,
+ ...         } // Metadata(doc="this is a nested dict")
+ ...     }) // Metadata(doc="and this is the root")
+ >>> c.metadata
+ {'doc': 'and this is the root'}
+ >>> c.get_config("key").metadata
+ {'doc': 'this is a nested dict'}
+ 
+
 Utilities
 =========
 
