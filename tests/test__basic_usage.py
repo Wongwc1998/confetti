@@ -57,6 +57,14 @@ class BasicUsageTest(TestCase):
         self.assertEquals(set(self.conf.keys()), set(['a']))
 
 
+class CopyingTest(TestCase):
+    def test__copying_nested_dictionaries(self):
+        raw_conf = {"a" : {"b" : 2}}
+        conf1 = Config(raw_conf)
+        conf2 = Config(raw_conf)
+        conf1["a"]["b"] += 1
+        self.assertNotEquals(conf1["a"]["b"], conf2["a"]["b"])
+
 class LinkedConfigurationTest(TestCase):
     def setUp(self):
         super(LinkedConfigurationTest, self).setUp()

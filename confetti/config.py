@@ -8,14 +8,25 @@ class Config(object):
     _backups = None
     def __init__(self, value=None, parent=None):
         super(Config, self).__init__()
-        if value is None:
-            value = {}
-        self._value = value
+        self._value = self._init_value(value)
+        if isinstance(self._value, dict):
+            self._fix_dictionary_value()
         self._parent = parent
         self.root = ConfigProxy(self)
+    def _init_value(self, value):
+        if value is None:
+            value = {}
+        elif isinstance(value, dict):
+            value = value.copy()
+        return value
+    def _fix_dictionary_value(self):
+        to_replace = []
+        for k, v in iteritems(self._value):
+            if isinstance(v, dict):
+                to_replace.append((k, Config(v, parent=self)))
+        for k, v in to_replace:
+            self._value[k] = v
     def is_leaf(self):
-        if isinstance(self._value, Config):
-            return self._value.is_leaf()
         return not isinstance(self._value, dict)
     def __getitem__(self, item):
         returned = self._value[item]
@@ -23,8 +34,7 @@ class Config(object):
             returned = returned._value
         if isinstance(returned, Ref):
             returned = returned.resolve(self)
-        if isinstance(returned, dict):
-            return Config(returned, parent=self)
+        assert not isinstance(returned, dict)
         return returned
     def __contains__(self, key):
         return self.get(key, NOTHING) is not NOTHING
