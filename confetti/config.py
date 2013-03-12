@@ -14,6 +14,10 @@ class Config(object):
         self._parent = parent
         self.metadata = metadata
         self.root = ConfigProxy(self)
+    def get_value(self):
+        if self.is_leaf():
+            return self._value
+        raise NotImplementedError("Cannot get value of config object") # pragma: no cover
     def _init_value(self, value):
         if value is None:
             value = {}
@@ -29,6 +33,14 @@ class Config(object):
             self._value[k] = v
     def is_leaf(self):
         return not isinstance(self._value, dict)
+    def traverse_leaves(self):
+        for key in self.keys():
+            value = self.get_config(key)
+            if value.is_leaf():
+                yield key, value
+            else:
+                for subpath, cfg in value.traverse_leaves():
+                    yield "{0}.{1}".format(key, subpath), cfg
     def __getitem__(self, item):
         returned = self._value[item]
         if isinstance(returned, Config) and returned.is_leaf():

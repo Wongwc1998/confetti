@@ -56,6 +56,22 @@ class BasicUsageTest(TestCase):
     def test__keys(self):
         self.assertEquals(set(self.conf.keys()), set(['a']))
 
+class TraversalTest(TestCase):
+    def setUp(self):
+        super(TraversalTest, self).setUp()
+        self.config = Config({
+            "a" : {
+                "b" : 2,
+                "c" : {
+                    "d" : 3,
+                },
+                "e" : 4,
+            },
+            "f" : 5,
+        })
+    def test__traverse_leaves(self):
+        self.assertEquals(sorted((path, c.get_value()) for path, c in self.config.traverse_leaves()),
+                          [("a.b", 2), ("a.c.d", 3), ("a.e", 4), ("f", 5)])
 
 class CopyingTest(TestCase):
     def test__copying_nested_dictionaries(self):
