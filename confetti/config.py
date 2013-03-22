@@ -101,6 +101,23 @@ class Config(object):
         return _get_state(self)
     def get_parent(self):
         return self._parent
+    def assign_path(self, path, value):
+        if '.' in path:
+            path, key = path.rsplit(".", 1)
+            conf = self.get_path(path)
+        else:
+            key = path
+            conf = self
+        conf[key] = value
+    def get_path(self, path):
+        returned = self
+        path_components = path.split(".")
+        for p in path_components:
+            key = returned.get(p, NOTHING)
+            if key is NOTHING:
+                raise exceptions.InvalidPath("Invalid path: {0!r}".format(path))
+            returned = returned[p]
+        return returned
 
 class ConfigProxy(object):
     def __init__(self, conf):

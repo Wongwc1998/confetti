@@ -1,22 +1,18 @@
 from ast import literal_eval
-from sentinels import NOTHING
-from .exceptions import InvalidPath
 from .exceptions import CannotDeduceType
 
 def assign_path(conf, path, value):
-    if '.' in path:
-        path, key = path.rsplit(".", 1)
-        conf = get_path(conf, path)
-    else:
-        key = path
-    conf[key] = value
+    conf.assign_path(path, value)
+
+def get_path(conf, path):
+    return conf.get_path(path)
 
 def assign_path_expression(conf, expr, deduce_type=False):
     path, value = expr.split("=", 1)
     if deduce_type:
-        leaf = get_path(conf, path)
+        leaf = conf.get_path(path)
         value = _coerce_leaf_value(path, value, leaf)
-    assign_path(conf, path, value)
+    conf.assign_path(path, value)
 
 _COMPOUND_TYPES = [list, tuple]
 _VALUES_FOR_TRUE = ['yes', 'y', 'true', 't']
@@ -34,16 +30,6 @@ def _coerce_leaf_value(path, value, leaf):
     if leaf_type in _COMPOUND_TYPES:
         return literal_eval(value)
     return leaf_type(value)
-
-def get_path(conf, path):
-    returned = conf
-    path_components = path.split(".")
-    for p in path_components:
-        key = returned.get(p, NOTHING)
-        if key is NOTHING:
-            raise InvalidPath("Invalid path: {0!r}".format(path))
-        returned = returned[p]
-    return returned
 
 def get_config_object_from_proxy(proxy):
     return proxy._conf

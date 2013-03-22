@@ -56,9 +56,9 @@ class BasicUsageTest(TestCase):
     def test__keys(self):
         self.assertEquals(set(self.conf.keys()), set(['a']))
 
-class TraversalTest(TestCase):
+class HelperMethodsTest(TestCase):
     def setUp(self):
-        super(TraversalTest, self).setUp()
+        super(HelperMethodsTest, self).setUp()
         self.config = Config({
             "a" : {
                 "b" : 2,

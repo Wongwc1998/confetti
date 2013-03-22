@@ -11,15 +11,15 @@ class PathAssignmentTest(TestCase):
         super(PathAssignmentTest, self).tearDown()
     def test__invalid_path_assignment_to_key(self):
         with self.assertRaises(exceptions.CannotSetValue):
-            utils.assign_path(self.conf, "a.b.d", 3)
+            self.conf.assign_path("a.b.d", 3)
     def test__invalid_path_assignment_to_path(self):
         with self.assertRaises(exceptions.InvalidPath):
-            utils.assign_path(self.conf, "a.g.d", 3)
+            self.conf.assign_path("a.g.d", 3)
     def test__invalid_path_getting(self):
         with self.assertRaises(exceptions.InvalidPath):
-            utils.get_path(self.conf, "a.g.d")
+            self.conf.get_path("a.g.d")
     def test__get_path_direct(self):
-        self.assertEquals(4, utils.get_path(self.conf, "d"))
+        self.assertEquals(4, self.conf.get_path("d"))
     def test__path_deducing_with_none(self):
         self.conf['a']['b']['c'] = None
         self.assertIsNone(self.conf.root.a.b.c)
