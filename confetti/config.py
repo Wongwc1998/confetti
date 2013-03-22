@@ -14,10 +14,7 @@ class Config(object):
         self._parent = parent
         self.metadata = metadata
         self.root = ConfigProxy(self)
-    def get_value(self):
-        if self.is_leaf():
-            return self._value
-        raise NotImplementedError("Cannot get value of config object") # pragma: no cover
+
     def _init_value(self, value):
         if value is None:
             value = {}
@@ -31,9 +28,28 @@ class Config(object):
                 to_replace.append((k, Config(v, parent=self)))
         for k, v in to_replace:
             self._value[k] = v
+
+    def get_value(self):
+        """
+        Gets the value of the config object, assuming it represents a leaf
+
+        .. seealso:: :func:`is_leaf <confetti.config.Config.is_leaf>`
+        """
+        if self.is_leaf():
+            return self._value
+        raise NotImplementedError("Cannot get value of config object") # pragma: no cover
+
     def is_leaf(self):
+        """
+        Returns whether this config object is a leaf, i.e. represents a value rather than a tree node.
+        """
         return not isinstance(self._value, dict)
+
     def traverse_leaves(self):
+        """
+        A generator, yielding tuples of the form (subpath, config_object) for each leaf config under
+        the given config object
+        """
         for key in self.keys():
             value = self.get_config(key)
             if value.is_leaf():
@@ -42,6 +58,12 @@ class Config(object):
                 for subpath, cfg in value.traverse_leaves():
                     yield "{0}.{1}".format(key, subpath), cfg
     def __getitem__(self, item):
+        """
+        Retrieves a direct child of this config object assuming it exists. The child is returned as a value, not as a
+        config object. If you wish to get the child as a config object, use :func:`Config.get_config`.
+
+        Raises KeyError if no such child exists
+        """
         returned = self._value[item]
         if isinstance(returned, Config) and returned.is_leaf():
             returned = returned._value
@@ -49,40 +71,72 @@ class Config(object):
             returned = returned.resolve(self)
         assert not isinstance(returned, dict)
         return returned
-    def __contains__(self, key):
-        return self.get(key, NOTHING) is not NOTHING
-    def get(self, key, default=None):
+
+    def __contains__(self, child_name):
+        """
+        Checks if this config object has a child under the given child_name
+        """
+        return self.get(child_name, NOTHING) is not NOTHING
+
+    def get(self, child_name, default=None):
+        """
+        Similar to ``dict.get()``, tries to get a child by its name, defaulting to None or a specific default value
+        """
         try:
-            return self[key]
+            return self[child_name]
         except KeyError:
             return default
-    def get_config(self, key):
-        returned = self._value[key]
+
+    def get_config(self, child_name):
+        """
+        Returns the child under the name ``child_name`` as a config object.
+        """
+        returned = self._value[child_name]
         if not isinstance(returned, Config):
-            returned = Config(returned, parent=self)
+            returned = self._value[child_name] = Config(returned, parent=self)
         return returned
-    def pop(self, key):
-        return self._value.pop(key)
+
+    def pop(self, child_name):
+        """
+        Removes a child by its name
+        """
+        return self._value.pop(child_name)
     def __setitem__(self, item, value):
+        """
+        Sets a value to a value (leaf) child. If the child does not currently exist, this will succeed
+        only if the value assigned is a config object.
+        """
         if not self._can_set_item(item, value):
             raise exceptions.CannotSetValue("Cannot set key {0!r}".format(item))
         self._value[item] = value
     def _can_set_item(self, item, value):
         return item in self._value or isinstance(value, Config)
     def keys(self):
+        """
+        Similar to ``dict.keys()`` - returns iterable of all keys in the config object
+        """
         return self._value.keys()
     @classmethod
     def from_filename(cls, filename, namespace=None):
+        """
+        Initializes the config from a file named ``filename``. The file is expected to contain a variable named ``CONFIG``.
+        """
         with open(filename, "rb") as f:
             return cls.from_file(f, filename)
     @classmethod
     def from_file(cls, f, filename="?", namespace=None):
+        """
+        Initializes the config from a file object ``f``. The file is expected to contain a variable named ``CONFIG``.
+        """
         ns = dict(__file__ = filename)
         if namespace is not None:
             ns.update(namespace)
         return cls.from_string(f.read(), namespace=namespace)
     @classmethod
     def from_string(cls, s, namespace = None):
+        """
+        Initializes the config from a string. The string is expected to contain the config as a variable named ``CONFIG``.
+        """
         if namespace is None:
             namespace = {}
         else:
@@ -90,18 +144,38 @@ class Config(object):
         exec(s, namespace)
         return cls(namespace['CONFIG'])
     def backup(self):
+        """
+        Saves a copy of the current state in the backup stack, possibly to be restored later
+        """
         if self._backups is None:
             self._backups = []
         self._backups.append(_get_state(self))
     def restore(self):
+        """
+        Restores the most recent backup of the configuration under this child
+        """
         if not self._backups:
             raise exceptions.NoBackup()
         _set_state(self, self._backups.pop())
     def serialize_to_dict(self):
+        """
+        Returns a recursive dict equivalent of this config object
+        """
         return _get_state(self)
     def get_parent(self):
+        """
+        Returns the parent config object
+        """
         return self._parent
     def assign_path(self, path, value):
+        """
+        Assigns ``value`` to the dotted path ``path``.
+
+        >>> config = Config({"a" : {"b" : 2}})
+        >>> config.assign_path("a.b", 3)
+        >>> config.root.a.b
+        3
+        """
         if '.' in path:
             path, key = path.rsplit(".", 1)
             conf = self.get_path(path)
@@ -110,6 +184,13 @@ class Config(object):
             conf = self
         conf[key] = value
     def get_path(self, path):
+        """
+        Gets a value by its dotted path
+
+        >>> config = Config({"a" : {"b" : 2}})
+        >>> config.get_path("a.b")
+        2
+        """
         returned = self
         path_components = path.split(".")
         for p in path_components:

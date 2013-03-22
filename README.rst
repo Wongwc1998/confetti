@@ -161,8 +161,7 @@ Path Assignment
 It is possible to assign to a config via path assignment, e.g::
 
  >>> c = Config(dict(a=dict(b=dict(c=3))))
- >>> from confetti.utils import assign_path
- >>> assign_path(c, "a.b.c", 4)
+ >>> c.assign_path("a.b.c", 4)
  >>> c.root.a.b.c
  4
 
@@ -186,3 +185,4 @@ Note that in this method, types are always strings. If your leaf already has a v
  >>> assign_path_expression(c, 'a.b.c=666', deduce_type=True)
  >>> c.root.a.b.c
  666
+
