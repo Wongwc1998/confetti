@@ -25,6 +25,12 @@ class BasicUsageTest(TestCase):
         self.assertEquals(list(self.conf['a'].keys()), ['b'])
         self.conf['a'].pop('b')
         self.assertEquals(list(self.conf['a'].keys()), [])
+    def test__setting_existing_paths_through_setitem(self):
+        self.conf["a"]["b"] = 3
+        self.assertEquals(self.conf.root.a.b, 3)
+    def test__setting_existing_paths_through_proxy(self):
+        self.conf.root.a.b = 3
+        self.assertEquals(self.conf.root.a.b, 3)
     def test__setting_nonexistent_paths(self):
         with self.assertRaises(exceptions.CannotSetValue):
             self.conf['a']['c'] = 4
@@ -37,24 +43,33 @@ class BasicUsageTest(TestCase):
         self.assertFalse("b" in self.conf)
         self.assertFalse("c" in self.conf["a"])
         self.assertTrue("b" in self.conf["a"])
-    def test__setting_new_values(self):
-        self.conf['c'] = Config(2)
-        self.assertEquals(self.conf.root.c, 2)
-        self.assertEquals(self.conf['c'], 2)
-    def test__setting_new_substructure(self):
-        self.conf['c'] = Config(dict(
-            a=dict(
-                b=True
-                )
-            ))
-        self.assertTrue(self.conf.root.c.a.b)
-        self.conf.root.c.a.b = False
-        self.assertFalse(self.conf.root.c.a.b)
     def test__item_not_found(self):
         with self.assertRaises(LookupError):
             self.conf.root.a.c
     def test__keys(self):
         self.assertEquals(set(self.conf.keys()), set(['a']))
+
+class ExtendingTest(TestCase):
+    def setUp(self):
+        super(ExtendingTest, self).setUp()
+        self.conf = Config({
+                "a" : 1
+                })
+    def test__extend_single_value(self):
+        self.conf.extend({"b" : 2})
+        self.assertEquals(self.conf.root.b, 2)
+    def test__extend_structure(self):
+        self.conf.extend({
+            "b" : {
+                "c" : {
+                    "d" : 2
+                }
+            }
+        })
+        self.assertEquals(self.conf.root.b.c.d, 2)
+    def test__extend_preserves_nodes(self):
+        self.conf.extend({ "b" : {"c" : 2} })
+        self.skipTest("n/i")
 
 class HelperMethodsTest(TestCase):
     def setUp(self):
@@ -86,7 +101,7 @@ class LinkedConfigurationTest(TestCase):
         super(LinkedConfigurationTest, self).setUp()
         self.conf1 = Config(dict(a=1))
         self.conf2 = Config(dict(c=2))
-        self.conf1['b'] = self.conf2
+        self.conf1.extend({"b" : self.conf2})
     def test__linked_configurations(self):
         self.assertIs(self.conf1['b'], self.conf2)
     def test__linked_backup_and_restore(self):

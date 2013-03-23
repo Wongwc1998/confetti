@@ -106,11 +106,21 @@ class Config(object):
         Sets a value to a value (leaf) child. If the child does not currently exist, this will succeed
         only if the value assigned is a config object.
         """
-        if not self._can_set_item(item, value):
+        if item not in self._value:
             raise exceptions.CannotSetValue("Cannot set key {0!r}".format(item))
         self._value[item] = value
-    def _can_set_item(self, item, value):
-        return item in self._value or isinstance(value, Config)
+    def extend(self, conf):
+        """
+        Extends a configuration files by adding values from a specified config or dict.
+        This permits adding new (previously nonexisting) structures or nodes to the configuration.
+        """
+        for key, value in iteritems(conf):
+            if isinstance(value, dict):
+                if key not in self._value:
+                    self._value[key] = {}
+                self.get_config(key).extend(value)
+            else:
+                self._value[key] = value
     def keys(self):
         """
         Similar to ``dict.keys()`` - returns iterable of all keys in the config object
