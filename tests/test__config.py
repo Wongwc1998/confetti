@@ -69,7 +69,11 @@ class ExtendingTest(TestCase):
         self.assertEquals(self.conf.root.b.c.d, 2)
     def test__extend_preserves_nodes(self):
         self.conf.extend({ "b" : {"c" : 2} })
-        self.skipTest("n/i")
+        self.conf.extend({ "b" : {"d" : 3} })
+        self.assertEquals(
+            self.conf.serialize_to_dict(),
+            {"a": 1, "b": {"c": 2, "d": 3}}
+            )
 
 class HelperMethodsTest(TestCase):
     def setUp(self):
