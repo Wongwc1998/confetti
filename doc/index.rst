@@ -113,6 +113,17 @@ Or you can apply a custom filter to the reference, to create derived values::
  >>> cfg.root.value_1
  'I am 1337'
 
+Metadata
+--------
+
+Confetti supports attaching metadata to configuration values. This is can be done directly with manipulating the ``metadata`` attribute of the :class:`.Config` class, but also has a handy syntax making use of the ``//`` operator::
+
+ >>> from confetti import Config, Metadata
+ >>> cfg = Config({
+ ...     "name" : "value" // Metadata(metadata_key="metadata_value"),
+ ... })
+ >>> cfg.get_config("name").metadata
+ {'metadata_key': 'metadata_value'}
 
 The confetti.config.Config Class
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
