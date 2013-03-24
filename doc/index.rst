@@ -30,6 +30,9 @@ Confetti also has convenience helpers to load from files that contain the above 
 Querying the Configuration Tree
 -------------------------------
 
+Getting Direct Values
++++++++++++++++++++++
+
 The simplest and most memorizable way to access values in the configuration structure is through the ``root`` member of the Config object. This member is a proxy to the Config object and allows accessing values through attributes::
 
   >>> from confetti import Config
@@ -43,6 +46,19 @@ You can also use ``__getitem__`` syntax (as in Python dicts) to access nodes and
 
   >>> c["a"]["b"]["c"]
   12
+
+For getting a nested value you can also use **configuration path**, which are dotted notations of the above::
+
+  >>> c.get_path("a.b.c")
+  12
+
+Getting Config Objects
+++++++++++++++++++++++
+
+For most manipulation and advanced querying purposes, a user would want to work with *config objects*, rather than direct values. Those provide more reflection capabilities and smarter traversal (e.g. finding the parent of a node). This is possible via the :func:`.Config.get_config` function::
+
+ >>> c.get_config("a")
+ <Config {'b': {'c': 12}}>
 
 Modifying Configurations
 ------------------------
