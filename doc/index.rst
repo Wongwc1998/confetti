@@ -95,6 +95,31 @@ Configuration objects have the :func:`.Config.extend` method to assign new value
 Advanced Uses
 ~~~~~~~~~~~~~
 
+Path Assignments
+----------------
+
+Config objects can assign to paths using the :func:`.Config.assign_path` method::
+
+ >>> c.assign_path("a.b.c", 2)
+ >>> c.root.a.b.c
+ 2
+
+Which is a synonym for:
+ 
+ >>> c.get_config("a.b.c").set_value(2)
+
+In some cases you want to process config overrides from various sources that are not completely type safe, e.g. command-line or environment variables. Such variables would look like ``'some.value=2'``. Confetti provides a utility for easily assigning such expressions, optionally deducing the leaf type::
+
+ >>> c.assign_path_expression("a.b.c=234", deduce_type=True)
+ >>> c.root.a.b.c
+ 234
+
+The default is no type deduction, which results in string values always:: 
+
+ >>> c.assign_path_expression("a.b.c=230")
+ >>> c.root.a.b.c
+ '230'
+
 Cross References
 ----------------
 

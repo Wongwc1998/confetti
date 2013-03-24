@@ -1,24 +1,11 @@
 from ast import literal_eval
 from .exceptions import CannotDeduceType
 
-def assign_path(conf, path, value):
-    conf.assign_path(path, value)
-
-def get_path(conf, path):
-    return conf.get_path(path)
-
-def assign_path_expression(conf, expr, deduce_type=False):
-    path, value = expr.split("=", 1)
-    if deduce_type:
-        leaf = conf.get_path(path)
-        value = _coerce_leaf_value(path, value, leaf)
-    conf.assign_path(path, value)
-
 _COMPOUND_TYPES = [list, tuple, dict]
 _VALUES_FOR_TRUE = ['yes', 'y', 'true', 't']
 _VALUES_FOR_FALSE = ['no', 'n', 'false', 'f']
 
-def _coerce_leaf_value(path, value, leaf):
+def coerce_leaf_value(path, value, leaf):
     if leaf is None:
         raise CannotDeduceType("Cannot deduce type of path {0!r}".format(path))
     leaf_type = type(leaf)

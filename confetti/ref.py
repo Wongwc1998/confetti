@@ -1,5 +1,4 @@
 from .exceptions import CannotResolveError
-from .utils import get_path
 
 class Ref(object):
     def __init__(self, target, filter=None):
@@ -16,7 +15,7 @@ class Ref(object):
                 raise CannotResolveError("Cannot resolve {0}".format(self._target))
             config = config.get_parent()
         try:
-            returned = get_path(config, target)
+            returned = config.get_path(target)
         except LookupError:
             raise CannotResolveError("Cannot resolve {0}".format(self._target))
         if self._filter is not None:

@@ -3,6 +3,7 @@ from sentinels import NOTHING
 from . import exceptions
 from .ref import Ref
 from .python3_compat import iteritems
+from .utils import coerce_leaf_value
 
 class Config(object):
     _backups = None
@@ -204,6 +205,13 @@ class Config(object):
         """
         config = self.get_config(path)
         config.set_value(value)
+    def assign_path_expression(self, expr, deduce_type=False):
+        path, value = expr.split("=", 1)
+        if deduce_type:
+            leaf = self.get_path(path)
+            value = coerce_leaf_value(path, value, leaf)
+        self.assign_path(path, value)
+
     def get_path(self, path):
         """
         Gets a value by its dotted path
