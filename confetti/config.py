@@ -6,7 +6,7 @@ from .python3_compat import iteritems
 
 class Config(object):
     _backups = None
-    def __init__(self, value=None, parent=None, metadata=None):
+    def __init__(self, value=NOTHING, parent=None, metadata=None):
         super(Config, self).__init__()
         self._value = self._init_value(value)
         if isinstance(self._value, dict):
@@ -16,7 +16,7 @@ class Config(object):
         self.root = ConfigProxy(self)
 
     def _init_value(self, value):
-        if value is None:
+        if value is NOTHING:
             value = {}
         elif isinstance(value, dict):
             value = value.copy()
