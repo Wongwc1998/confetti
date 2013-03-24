@@ -9,9 +9,6 @@ class PathAssignmentTest(TestCase):
         self.conf = Config(dict(a=dict(b=dict(c=3)), d=4))
     def tearDown(self):
         super(PathAssignmentTest, self).tearDown()
-    def test__invalid_path_assignment_to_key(self):
-        with self.assertRaises(exceptions.CannotSetValue):
-            self.conf.assign_path("a.b.d", 3)
     def test__invalid_path_assignment_to_path(self):
         with self.assertRaises(exceptions.InvalidPath):
             self.conf.assign_path("a.g.d", 3)
@@ -21,10 +18,11 @@ class PathAssignmentTest(TestCase):
     def test__get_path_direct(self):
         self.assertEquals(4, self.conf.get_path("d"))
     def test__path_deducing_with_none(self):
-        self.conf['a']['b']['c'] = None
+        self.conf.root.a.b.c = None
         self.assertIsNone(self.conf.root.a.b.c)
         with self.assertRaises(exceptions.CannotDeduceType):
             utils.assign_path_expression(self.conf, 'a.b.c=2', deduce_type=True)
+        self.assertIsNone(self.conf.root.a.b.c)
     def test__path_deducing_with_compound_types(self):
         for initial_value, value in [
                 ([1, 2, 3], ["a", "b", 3]),

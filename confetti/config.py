@@ -37,8 +37,18 @@ class Config(object):
         """
         if self.is_leaf():
             return self._value
-        return self.serialize_to_dict()
+        returned = {}
+        for key in self.keys():
+            returned[key] = self.get_config(key).get_value()
+        return returned
 
+    def set_value(self, value):
+        """
+        Sets the value for the config object assuming it is a leaf
+        """
+        if not self.is_leaf():
+            raise exceptions.CannotSetValue("Cannot set value of a non-leaf config object")
+        self._value = value
     def is_leaf(self):
         """
         Returns whether this config object is a leaf, i.e. represents a value rather than a tree node.
@@ -87,13 +97,19 @@ class Config(object):
         except KeyError:
             return default
 
-    def get_config(self, child_name):
+    def get_config(self, path):
         """
-        Returns the child under the name ``child_name`` as a config object.
+        Returns the child under the name ``path`` (dotted notation) as a config object.
         """
-        returned = self._value[child_name]
-        if not isinstance(returned, Config):
-            returned = self._value[child_name] = Config(returned, parent=self)
+        returned = self
+        path_components = path.split(".")
+        for p in path_components:
+            child = returned._value.get(p, NOTHING)
+            if child is NOTHING:
+                raise exceptions.InvalidPath("Invalid path: {0!r}".format(path))
+            if not isinstance(child, Config):
+                child = returned._value[p] = Config(child, parent=returned)
+            returned = child
         return returned
 
     def pop(self, child_name):
@@ -186,13 +202,8 @@ class Config(object):
         >>> config.root.a.b
         3
         """
-        if '.' in path:
-            path, key = path.rsplit(".", 1)
-            conf = self.get_path(path)
-        else:
-            key = path
-            conf = self
-        conf[key] = value
+        config = self.get_config(path)
+        config.set_value(value)
     def get_path(self, path):
         """
         Gets a value by its dotted path
@@ -201,14 +212,8 @@ class Config(object):
         >>> config.get_path("a.b")
         2
         """
-        returned = self
-        path_components = path.split(".")
-        for p in path_components:
-            key = returned.get(p, NOTHING)
-            if key is NOTHING:
-                raise exceptions.InvalidPath("Invalid path: {0!r}".format(path))
-            returned = returned[p]
-        return returned
+        return self.get_config(path).get_value()
+
     def __repr__(self):
         return "<Config {0}>".format(self.get_value())
 

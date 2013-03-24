@@ -60,6 +60,11 @@ For most manipulation and advanced querying purposes, a user would want to work 
  >>> c.get_config("a")
  <Config {'b': {'c': 12}}>
 
+You can also use dotted notation::
+
+ >>> c.get_config("a.b.c")
+ <Config 12>
+
 Modifying Configurations
 ------------------------
 
