@@ -37,7 +37,7 @@ class Config(object):
         """
         if self.is_leaf():
             return self._value
-        raise NotImplementedError("Cannot get value of config object") # pragma: no cover
+        return self.serialize_to_dict()
 
     def is_leaf(self):
         """
@@ -209,6 +209,8 @@ class Config(object):
                 raise exceptions.InvalidPath("Invalid path: {0!r}".format(path))
             returned = returned[p]
         return returned
+    def __repr__(self):
+        return "<Config {0}>".format(self.get_value())
 
 class ConfigProxy(object):
     def __init__(self, conf):
