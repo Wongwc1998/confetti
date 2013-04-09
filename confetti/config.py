@@ -205,11 +205,12 @@ class Config(object):
         """
         config = self.get_config(path)
         config.set_value(value)
-    def assign_path_expression(self, expr, deduce_type=False):
+
+    def assign_path_expression(self, expr, deduce_type=False, default_type=None):
         path, value = expr.split("=", 1)
         if deduce_type:
             leaf = self.get_path(path)
-            value = coerce_leaf_value(path, value, leaf)
+            value = coerce_leaf_value(path, value, leaf, default_type)
         self.assign_path(path, value)
 
     def get_path(self, path):

@@ -5,7 +5,7 @@ from confetti import exceptions
 class PathAssignmentTest(TestCase):
     def setUp(self):
         super(PathAssignmentTest, self).setUp()
-        self.conf = Config(dict(a=dict(b=dict(c=3)), d=4))
+        self.conf = Config(dict(a=dict(b=dict(c=3)), d=4, e=None))
     def tearDown(self):
         super(PathAssignmentTest, self).tearDown()
     def test__invalid_path_assignment_to_path(self):
@@ -22,6 +22,9 @@ class PathAssignmentTest(TestCase):
         with self.assertRaises(exceptions.CannotDeduceType):
             self.conf.assign_path_expression('a.b.c=2', deduce_type=True)
         self.assertIsNone(self.conf.root.a.b.c)
+    def test__path_deducing_with_none_force_type(self):
+        self.conf.assign_path_expression("a.b.c=2", deduce_type=True, default_type=str)
+        self.assertEquals(self.conf.root.a.b.c, 2)
     def test__path_deducing_with_compound_types(self):
         for initial_value, value in [
                 ([1, 2, 3], ["a", "b", 3]),
