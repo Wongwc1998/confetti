@@ -1,9 +1,12 @@
 from .config import Config
 
+
 class Metadata(object):
+
     def __init__(self, **kwargs):
         super(Metadata, self).__init__()
         self.metadata = kwargs
+
     def __rfloordiv__(self, value):
         if isinstance(value, Config):
             if value.metadata is None:

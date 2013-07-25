@@ -11,12 +11,12 @@ if platform.python_version() < '2.7':
     _REQUIREMENTS.append('unittest2')
 
 setup(name="confetti",
-      classifiers = [
+      classifiers=[
           "Development Status :: 4 - Beta",
           "Intended Audience :: Developers",
           "License :: OSI Approved :: BSD License",
           "Programming Language :: Python :: 2.7",
-          ],
+      ],
       description="Generic configuration mechanism",
       license="BSD",
       author="Rotem Yaari",

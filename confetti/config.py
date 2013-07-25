@@ -5,8 +5,10 @@ from .ref import Ref
 from .python3_compat import iteritems
 from .utils import coerce_leaf_value
 
+
 class Config(object):
     _backups = None
+
     def __init__(self, value=NOTHING, parent=None, metadata=None):
         super(Config, self).__init__()
         self._value = self._init_value(value)
@@ -22,6 +24,7 @@ class Config(object):
         elif isinstance(value, dict):
             value = value.copy()
         return value
+
     def _fix_dictionary_value(self):
         to_replace = []
         for k, v in iteritems(self._value):
@@ -48,8 +51,10 @@ class Config(object):
         Sets the value for the config object assuming it is a leaf
         """
         if not self.is_leaf():
-            raise exceptions.CannotSetValue("Cannot set value of a non-leaf config object")
+            raise exceptions.CannotSetValue(
+                "Cannot set value of a non-leaf config object")
         self._value = value
+
     def is_leaf(self):
         """
         Returns whether this config object is a leaf, i.e. represents a value rather than a tree node.
@@ -68,6 +73,7 @@ class Config(object):
             else:
                 for subpath, cfg in value.traverse_leaves():
                     yield "{0}.{1}".format(key, subpath), cfg
+
     def __getitem__(self, item):
         """
         Retrieves a direct child of this config object assuming it exists. The child is returned as a value, not as a
@@ -107,7 +113,8 @@ class Config(object):
         for p in path_components:
             child = returned._value.get(p, NOTHING)
             if child is NOTHING:
-                raise exceptions.InvalidPath("Invalid path: {0!r}".format(path))
+                raise exceptions.InvalidPath(
+                    "Invalid path: {0!r}".format(path))
             if not isinstance(child, Config):
                 child = returned._value[p] = Config(child, parent=returned)
             returned = child
@@ -118,14 +125,17 @@ class Config(object):
         Removes a child by its name
         """
         return self._value.pop(child_name)
+
     def __setitem__(self, item, value):
         """
         Sets a value to a value (leaf) child. If the child does not currently exist, this will succeed
         only if the value assigned is a config object.
         """
         if item not in self._value:
-            raise exceptions.CannotSetValue("Cannot set key {0!r}".format(item))
+            raise exceptions.CannotSetValue(
+                "Cannot set key {0!r}".format(item))
         self._value[item] = value
+
     def extend(self, conf):
         """
         Extends a configuration files by adding values from a specified config or dict.
@@ -138,11 +148,13 @@ class Config(object):
                 self.get_config(key).extend(value)
             else:
                 self._value[key] = value
+
     def keys(self):
         """
         Similar to ``dict.keys()`` - returns iterable of all keys in the config object
         """
         return self._value.keys()
+
     @classmethod
     def from_filename(cls, filename, namespace=None):
         """
@@ -150,17 +162,19 @@ class Config(object):
         """
         with open(filename, "rb") as f:
             return cls.from_file(f, filename)
+
     @classmethod
     def from_file(cls, f, filename="?", namespace=None):
         """
         Initializes the config from a file object ``f``. The file is expected to contain a variable named ``CONFIG``.
         """
-        ns = dict(__file__ = filename)
+        ns = dict(__file__=filename)
         if namespace is not None:
             ns.update(namespace)
         return cls.from_string(f.read(), namespace=namespace)
+
     @classmethod
-    def from_string(cls, s, namespace = None):
+    def from_string(cls, s, namespace=None):
         """
         Initializes the config from a string. The string is expected to contain the config as a variable named ``CONFIG``.
         """
@@ -170,6 +184,7 @@ class Config(object):
             namespace = dict(namespace)
         exec(s, namespace)
         return cls(namespace['CONFIG'])
+
     def backup(self):
         """
         Saves a copy of the current state in the backup stack, possibly to be restored later
@@ -177,6 +192,7 @@ class Config(object):
         if self._backups is None:
             self._backups = []
         self._backups.append(_get_state(self))
+
     def restore(self):
         """
         Restores the most recent backup of the configuration under this child
@@ -184,16 +200,19 @@ class Config(object):
         if not self._backups:
             raise exceptions.NoBackup()
         _set_state(self, self._backups.pop())
+
     def serialize_to_dict(self):
         """
         Returns a recursive dict equivalent of this config object
         """
         return _get_state(self)
+
     def get_parent(self):
         """
         Returns the parent config object
         """
         return self._parent
+
     def assign_path(self, path, value):
         """
         Assigns ``value`` to the dotted path ``path``.
@@ -226,12 +245,16 @@ class Config(object):
     def __repr__(self):
         return "<Config {0}>".format(self.get_value())
 
+
 class ConfigProxy(object):
+
     def __init__(self, conf):
         super(ConfigProxy, self).__init__()
         self._conf = conf
+
     def __dir__(self):
         return list(self._conf.keys())
+
     def __setattr__(self, attr, value):
         if attr.startswith("_"):
             return super(ConfigProxy, self).__setattr__(attr, value)
@@ -240,6 +263,7 @@ class ConfigProxy(object):
             self._conf[attr] = value
         except exceptions.CannotSetValue:
             raise AttributeError(attr)
+
     def __getattr__(self, attr):
         value = self._conf[attr]
         if isinstance(value, dict):
@@ -247,6 +271,7 @@ class ConfigProxy(object):
         if isinstance(value, Config):
             return ConfigProxy(value)
         return value
+
 
 def _get_state(config):
     if isinstance(config, Config):
@@ -259,6 +284,7 @@ def _get_state(config):
             returned[key] = _get_state(config[key])
         return returned
     return config
+
 
 def _set_state(config, state):
     assert isinstance(config, Config)

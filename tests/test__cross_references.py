@@ -1,32 +1,35 @@
 from .test_utils import TestCase
 from confetti import Config, Ref
 
+
 class CrossReferencingTest(TestCase):
     VALUE = 239829382
+
     def test__references(self):
         conf = Config(dict(
-            a = dict(
-                b = self.VALUE,
-                references_b = Ref("b")
-                )
-            )).root
+            a=dict(
+                b=self.VALUE,
+                references_b=Ref("b")
+            )
+        )).root
         self.assertEquals(conf.a.references_b, self.VALUE)
+
     def test__references_traversal(self):
         conf = Config(dict(
-            a = dict(
-                a_1 = dict(
-                    value = 23232,
-                    ref_1 = Ref(".value"),
-                    ref_2 = Ref("..a_2.value"),
-                    ref_3 = Ref("...b.b_1.value"),
+            a=dict(
+                a_1=dict(
+                    value=23232,
+                    ref_1=Ref(".value"),
+                    ref_2=Ref("..a_2.value"),
+                    ref_3=Ref("...b.b_1.value"),
                 ),
-                a_2 = dict(
-                    value = 383872,
+                a_2=dict(
+                    value=383872,
                 )
             ),
-            b = dict(
-                b_1 = dict(
-                    value = 287870997,
+            b=dict(
+                b_1=dict(
+                    value=287870997,
                 )
             )
         )).root

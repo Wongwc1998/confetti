@@ -5,6 +5,7 @@ _COMPOUND_TYPES = [list, tuple, dict]
 _VALUES_FOR_TRUE = ['yes', 'y', 'true', 't']
 _VALUES_FOR_FALSE = ['no', 'n', 'false', 'f']
 
+
 def coerce_leaf_value(path, value, leaf, default_type=None):
     if leaf is not None:
         leaf_type = type(leaf)
@@ -20,6 +21,7 @@ def coerce_leaf_value(path, value, leaf, default_type=None):
     if leaf_type in _COMPOUND_TYPES:
         return literal_eval(value)
     return leaf_type(value)
+
 
 def get_config_object_from_proxy(proxy):
     return proxy._conf

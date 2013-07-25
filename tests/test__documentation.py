@@ -2,7 +2,9 @@ from unittest import TestCase
 import os
 import doctest
 
+
 class DocumentationTest(TestCase):
+
     def test__doctests(self):
         for p, _, filenames in os.walk(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "doc"))):
             for filename in filenames:
@@ -10,4 +12,5 @@ class DocumentationTest(TestCase):
                     continue
                 filename = os.path.join(p, filename)
                 result = doctest.testfile(filename, module_relative=False)
-                self.assertEquals(result.failed, 0, "%s tests failed!" % result.failed)
+                self.assertEquals(
+                    result.failed, 0, "%s tests failed!" % result.failed)

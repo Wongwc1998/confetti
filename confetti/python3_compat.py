@@ -12,5 +12,7 @@ else:
     iteritems = dict.iteritems
     from __builtin__ import basestring
     from __builtin__ import reduce
+
+
 def items_list(dictionary):
     return list(iteritems(dictionary))
