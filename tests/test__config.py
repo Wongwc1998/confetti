@@ -37,10 +37,6 @@ class BasicUsageTest(TestCase):
         self.conf["a"]["b"] = 3
         self.assertEquals(self.conf.root.a.b, 3)
 
-    def test__setting_existing_paths_through_proxy(self):
-        self.conf.root.a.b = 3
-        self.assertEquals(self.conf.root.a.b, 3)
-
     def test__setting_existing_paths_through_assign_path(self):
         self.conf.assign_path('a.b', 3)
         self.assertEquals(self.conf.root.a.b, 3)
