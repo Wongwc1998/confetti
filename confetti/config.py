@@ -1,8 +1,11 @@
 import copy
+import itertools
+
 from sentinels import NOTHING
+
 from . import exceptions
-from .ref import Ref
 from .python3_compat import iteritems
+from .ref import Ref
 from .utils import coerce_leaf_value
 
 
@@ -136,12 +139,14 @@ class Config(object):
                 "Cannot set key {0!r}".format(item))
         self._value[item] = value
 
-    def extend(self, conf):
+    def extend(self, conf=None, **kw):
         """
         Extends a configuration files by adding values from a specified config or dict.
         This permits adding new (previously nonexisting) structures or nodes to the configuration.
         """
-        for key, value in iteritems(conf):
+        if conf is None:
+            conf = {}
+        for key, value in itertools.chain(iteritems(conf), iteritems(kw)):
             if isinstance(value, dict):
                 if key not in self._value:
                     self._value[key] = {}

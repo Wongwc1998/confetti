@@ -76,6 +76,10 @@ class ExtendingTest(TestCase):
         self.conf.extend({"b": 2})
         self.assertEquals(self.conf.root.b, 2)
 
+    def test__extend_keyword_arguments(self):
+        self.conf.extend(b=2)
+        self.assertEquals(self.conf.root.b, 2)
+
     def test__extend_structure(self):
         self.conf.extend({
             "b": {
