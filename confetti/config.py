@@ -146,6 +146,8 @@ class Config(object):
         """
         if conf is None:
             conf = {}
+        if isinstance(conf, Config):
+            conf = conf.serialize_to_dict()
         for key, value in itertools.chain(iteritems(conf), iteritems(kw)):
             if isinstance(value, dict):
                 if key not in self._value:

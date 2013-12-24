@@ -98,6 +98,17 @@ class ExtendingTest(TestCase):
             {"a": 1, "b": {"c": 2, "d": 3}}
         )
 
+    def test__extend_config(self):
+        self.conf.extend(Config({
+            "b": {
+                "c": {
+                    "d": 2
+                }
+            }
+        }))
+        self.assertEquals(self.conf.root.b.c.d, 2)
+
+
 
 class HelperMethodsTest(TestCase):
 
