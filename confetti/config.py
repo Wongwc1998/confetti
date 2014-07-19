@@ -137,7 +137,16 @@ class Config(object):
         if item not in self._value:
             raise exceptions.CannotSetValue(
                 "Cannot set key {0!r}".format(item))
+        old_value = self._value[item]
+        if isinstance(old_value, Config):
+            old_metaata = old_value.metadata
+        else:
+            old_metaata = NOTHING
         self._value[item] = value
+        if old_metaata is not NOTHING:
+            if not isinstance(value, Config):
+                self._value[item] = Config(value, parent=self)
+            self._value[item].metadata = old_metaata
 
     def extend(self, conf=None, **kw):
         """
