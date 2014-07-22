@@ -4,7 +4,7 @@ import itertools
 from sentinels import NOTHING
 
 from . import exceptions
-from .python3_compat import iteritems
+from .python3_compat import iteritems, string_types
 from .ref import Ref
 from .utils import coerce_leaf_value
 
@@ -239,7 +239,7 @@ class Config(object):
         3
         """
         config = self.get_config(path)
-        if deduce_type:
+        if deduce_type and isinstance(value, string_types):
             leaf = self.get_path(path)
             value = coerce_leaf_value(path, value, leaf, default_type)
 
