@@ -229,7 +229,7 @@ class Config(object):
         """
         return self._parent
 
-    def assign_path(self, path, value):
+    def assign_path(self, path, value, deduce_type=False, default_type=None):
         """
         Assigns ``value`` to the dotted path ``path``.
 
@@ -239,14 +239,15 @@ class Config(object):
         3
         """
         config = self.get_config(path)
+        if deduce_type:
+            leaf = self.get_path(path)
+            value = coerce_leaf_value(path, value, leaf, default_type)
+
         config.set_value(value)
 
     def assign_path_expression(self, expr, deduce_type=False, default_type=None):
         path, value = expr.split("=", 1)
-        if deduce_type:
-            leaf = self.get_path(path)
-            value = coerce_leaf_value(path, value, leaf, default_type)
-        self.assign_path(path, value)
+        self.assign_path(path, value, deduce_type, default_type)
 
     def get_path(self, path):
         """

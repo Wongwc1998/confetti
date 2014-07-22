@@ -30,6 +30,11 @@ class PathAssignmentTest(TestCase):
             self.conf.assign_path_expression('a.b.c=2', deduce_type=True)
         self.assertIsNone(self.conf.root.a.b.c)
 
+    def test__path_assign_value_deduce_type(self):
+        self.conf.root.a.b.c = 1
+        self.conf.assign_path('a.b.c', '2', deduce_type=True)
+        self.assertEquals(self.conf.root.a.b.c, 2)
+
     def test__path_deducing_with_none_force_type(self):
         self.conf.assign_path_expression(
             "a.b.c=2", deduce_type=True, default_type=str)
