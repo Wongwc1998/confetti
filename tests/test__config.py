@@ -184,6 +184,12 @@ class BackupTest(TestCase):
         with self.assertRaises(exceptions.NoBackup):
             self.conf.restore()
 
+    def test__discard(self):
+        self.conf.backup()
+        self.conf.discard_backup()
+        with self.assertRaises(exceptions.NoBackup):
+            self.conf.restore()
+
 class SerializationTest(TestCase):
 
     def setUp(self):

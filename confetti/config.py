@@ -209,6 +209,12 @@ class Config(object):
             self._backups = []
         self._backups.append(_get_state(self))
 
+    def discard_backup(self):
+        """
+        Discards the latest backup made
+        """
+        self._backups.pop()
+
     def restore(self):
         """
         Restores the most recent backup of the configuration under this child
