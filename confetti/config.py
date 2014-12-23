@@ -155,8 +155,10 @@ class Config(object):
         """
         if conf is None:
             conf = {}
+
         if isinstance(conf, Config):
-            conf = conf.serialize_to_dict()
+            conf = dict((key, conf.get_config(key)) for key in conf.keys())
+
         for key, value in itertools.chain(iteritems(conf), iteritems(kw)):
             if isinstance(value, dict):
                 if key not in self._value:
@@ -164,6 +166,7 @@ class Config(object):
                 self.get_config(key).extend(value)
             else:
                 self._value[key] = value
+
 
     def keys(self):
         """

@@ -2,6 +2,7 @@ from .test_utils import TestCase
 from confetti import Config
 from confetti import get_config_object_from_proxy
 from confetti import exceptions
+from confetti import Metadata
 
 
 class BasicUsageTest(TestCase):
@@ -107,6 +108,19 @@ class ExtendingTest(TestCase):
             }
         }))
         self.assertEquals(self.conf.root.b.c.d, 2)
+
+    def test__extend_config_propagates_changes(self):
+        new_cfg = Config({'b': {'c': 2}})
+        self.conf.extend(new_cfg)
+        self.assertEquals(self.conf.root.b.c, 2)
+        new_cfg.root.b.c = 3
+        self.assertEquals(self.conf.root.b.c, 3)
+
+    def test__extend_config_preserves_metadata(self):
+        new_cfg = Config({'b': {'c': 2 // Metadata(x=3)}})
+        self.conf.extend(new_cfg)
+        self.assertEquals(self.conf.get_config('b.c').metadata, {'x': 3})
+
 
 
 
