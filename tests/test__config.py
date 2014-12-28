@@ -91,6 +91,11 @@ class ExtendingTest(TestCase):
         })
         self.assertEquals(self.conf.root.b.c.d, 2)
 
+    def test__extend_structure_and_keywords(self):
+        self.conf.extend({"b":1, "c":3}, b=2)
+        self.assertEquals(self.conf.root.b, 2)
+        self.assertEquals(self.conf.root.c, 3)
+
     def test__extend_preserves_nodes(self):
         self.conf.extend({"b": {"c": 2}})
         self.conf.extend({"b": {"d": 3}})
@@ -121,9 +126,28 @@ class ExtendingTest(TestCase):
         self.conf.extend(new_cfg)
         self.assertEquals(self.conf.get_config('b.c').metadata, {'x': 3})
 
+    def test__extend_config_preserves_nodes(self):
+        self.conf.extend(Config({"b": {"c": 2}}))
+        self.conf.extend(Config({"b": {"c": 2, "d": 3}}))
+        self.assertEquals(
+            self.conf.serialize_to_dict(),
+            {"a": 1, "b": {"c": 2, "d": 3}}
+        )
 
+    def test__extend_config_prevents_losing_path(self):
+        self.conf.extend(Config({"b": {"c": 2}}))
+        with self.assertRaises(exceptions.CannotSetValue):
+            self.conf.extend(Config({"b": {"d": 3}}))
 
-
+    def test__update_config_preserves_nodes(self):
+        self.conf.update(Config({"b": {"c": 2}}))
+        self.conf.update(Config({"b": {"d": 3}}))
+        self.assertEquals(
+            self.conf.serialize_to_dict(),
+            {"a": 1, "b": {"c": 2, "d": 3}}
+        )
+        
+        
 class HelperMethodsTest(TestCase):
 
     def setUp(self):

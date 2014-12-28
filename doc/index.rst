@@ -92,6 +92,33 @@ Configuration objects have the :func:`.Config.extend` method to assign new value
  >>> c.root.new_value
  1
 
+It is possible to assign a path with a Config object, which is referenced in the parent Config, and can be updated:
+
+ >>> new_conf = Config({"inner": 1})
+ >>> c.extend({"linked_value":new_conf})
+ >>> c.root.linked_value.inner
+ 1
+ >>> new_conf.root.inner = 2
+ >>> c.root.linked_value.inner
+ 2
+
+However, it is not allowed to extend using a Config object if it will remove existing paths:
+
+ >>> c.extend(Config({'extended_value':{'child1':1}}))
+ >>> c.extend(Config({'extended_value':{'child2':2}})) # doctest: +IGNORE_EXCEPTION_DETAIL
+ Traceback (most recent call last):
+    ...
+ CannotSetValue: ...
+ 
+In the above example, in order to add the path c.root.extended_value.child2, without re-specifying extended_value.child1, use the :func:`.Config.update` method:
+
+ >>> c.update(Config({'extended_value':{'child2':2}}))
+ >>> c.root.extended_value.child1
+ 1
+ >>> c.root.extended_value.child2
+ 2
+ 
+
 Advanced Uses
 ~~~~~~~~~~~~~
 

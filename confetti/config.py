@@ -1,6 +1,3 @@
-import copy
-import itertools
-
 from sentinels import NOTHING
 
 from . import exceptions
@@ -157,9 +154,34 @@ class Config(object):
             conf = {}
 
         if isinstance(conf, Config):
-            conf = dict((key, conf.get_config(key)) for key in conf.keys())
+            self._extend_from_conf(conf)
+        else:
+            self._extend_from_dict(conf)
+        self._extend_from_dict(kw)
+    
+    def _extend_from_conf(self, conf):
+        conf = dict((key, conf.get_config(key)) for key in conf.keys())
+        for key, value in iteritems(conf):
+            if key in self._value:
+                self.get_config(key)._verify_config_paths(value)
+        for key, value in iteritems(conf):
+            self._value[key] = value
 
-        for key, value in itertools.chain(iteritems(conf), iteritems(kw)):
+    def _verify_config_paths(self, conf):
+        if self.is_leaf():
+            if (isinstance(conf, Config) and not conf.is_leaf()) or isinstance(conf, dict):
+                raise exceptions.CannotSetValue("Setting {0} will cause a value to disappear from {1}".format(conf, self))
+        else:
+            if conf.is_leaf():
+                raise exceptions.CannotSetValue("Setting {0} will cause paths to disappear from {1}".format(conf, self))
+            else:
+                for k in self._value.keys():
+                    if k not in conf._value:
+                        raise exceptions.CannotSetValue("Setting {0} will cause paths to disappear from {1}".format(conf, self))
+                    self.get_config(k)._verify_config_paths(conf._value[k])
+
+    def _extend_from_dict(self, d):
+        for key, value in iteritems(d):
             if isinstance(value, dict):
                 if key not in self._value:
                     self._value[key] = {}
@@ -167,6 +189,15 @@ class Config(object):
             else:
                 self._value[key] = value
 
+    def update(self, conf):
+        conf = dict((key, conf.get_config(key)) for key in conf.keys())
+        for key, value in iteritems(conf):
+            if not value.is_leaf():
+                if key not in self._value:
+                    self._value[key] = {}
+                self.get_config(key).update(value)
+            else:
+                self._value[key] = value
 
     def keys(self):
         """
