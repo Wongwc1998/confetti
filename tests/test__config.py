@@ -92,7 +92,7 @@ class ExtendingTest(TestCase):
         self.assertEquals(self.conf.root.b.c.d, 2)
 
     def test__extend_structure_and_keywords(self):
-        self.conf.extend({"b":1, "c":3}, b=2)
+        self.conf.extend({"b": 1, "c": 3}, b=2)
         self.assertEquals(self.conf.root.b, 2)
         self.assertEquals(self.conf.root.c, 3)
 
@@ -146,8 +146,8 @@ class ExtendingTest(TestCase):
             self.conf.serialize_to_dict(),
             {"a": 1, "b": {"c": 2, "d": 3}}
         )
-        
-        
+
+
 class HelperMethodsTest(TestCase):
 
     def setUp(self):
@@ -218,6 +218,13 @@ class BackupTest(TestCase):
         super(BackupTest, self).setUp()
         self.conf = Config(dict(a=1, b=2))
 
+    def test__backup_context(self):
+        with self.conf.backup_context():
+            self.conf.root.a = 10
+            assert self.conf.root.a == 10
+
+        assert self.conf.root.a == 1
+
     def test__restore_no_backup(self):
         with self.assertRaises(exceptions.NoBackup):
             self.conf.restore()
@@ -227,6 +234,7 @@ class BackupTest(TestCase):
         self.conf.discard_backup()
         with self.assertRaises(exceptions.NoBackup):
             self.conf.restore()
+
 
 class SerializationTest(TestCase):
 

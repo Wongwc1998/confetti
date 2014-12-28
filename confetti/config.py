@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+
 from sentinels import NOTHING
 
 from . import exceptions
@@ -158,7 +160,7 @@ class Config(object):
         else:
             self._extend_from_dict(conf)
         self._extend_from_dict(kw)
-    
+
     def _extend_from_conf(self, conf):
         conf = dict((key, conf.get_config(key)) for key in conf.keys())
         for key, value in iteritems(conf):
@@ -170,14 +172,17 @@ class Config(object):
     def _verify_config_paths(self, conf):
         if self.is_leaf():
             if (isinstance(conf, Config) and not conf.is_leaf()) or isinstance(conf, dict):
-                raise exceptions.CannotSetValue("Setting {0} will cause a value to disappear from {1}".format(conf, self))
+                raise exceptions.CannotSetValue(
+                    "Setting {0} will cause a value to disappear from {1}".format(conf, self))
         else:
             if conf.is_leaf():
-                raise exceptions.CannotSetValue("Setting {0} will cause paths to disappear from {1}".format(conf, self))
+                raise exceptions.CannotSetValue(
+                    "Setting {0} will cause paths to disappear from {1}".format(conf, self))
             else:
                 for k in self._value.keys():
                     if k not in conf._value:
-                        raise exceptions.CannotSetValue("Setting {0} will cause paths to disappear from {1}".format(conf, self))
+                        raise exceptions.CannotSetValue(
+                            "Setting {0} will cause paths to disappear from {1}".format(conf, self))
                     self.get_config(k)._verify_config_paths(conf._value[k])
 
     def _extend_from_dict(self, d):
@@ -242,6 +247,17 @@ class Config(object):
         if self._backups is None:
             self._backups = []
         self._backups.append(_get_state(self))
+
+    @contextmanager
+    def backup_context(self):
+        """
+        A context manager wrapping backup() and restore()
+        """
+        self.backup()
+        try:
+            yield
+        finally:
+            self.restore()
 
     def discard_backup(self):
         """

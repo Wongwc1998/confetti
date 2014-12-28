@@ -186,6 +186,38 @@ Or you can apply a custom filter to the reference, to create derived values::
  >>> cfg.root.value_1
  'I am 1337'
 
+
+Backing Up/Restoring
+--------------------
+
+Whenever you want to preserve the configuration prior to a change and restore it later, you can do it with :meth:`.Config.backup` and :meth:`.Config.restore`. They work like a stack, so they push and pop states::
+
+ >>> c = Config({"value":2})
+ >>> c['value']
+ 2
+ >>> c.backup()
+ >>> c['value'] = 3
+ >>> c['value']
+ 3
+ >>> c.backup()
+ >>> c['value'] = 4
+ >>> c['value']
+ 4
+ >>> c.restore()
+ >>> c['value']
+ 3
+ >>> c.restore()
+ >>> c['value']
+ 2
+
+You can also use :meth:`.Config.backup_context` to wrap blocks of code with backup/restore operations::
+
+ >>> with c.backup_context():
+ ...    c['value'] = 4
+ >>> c['value']
+ 2
+
+
 Metadata
 --------
 
@@ -197,6 +229,9 @@ Confetti supports attaching metadata to configuration values. This is can be don
  ... })
  >>> cfg.get_config("name").metadata
  {'metadata_key': 'metadata_value'}
+
+
+
 
 The confetti.config.Config Class
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
