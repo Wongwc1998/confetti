@@ -160,7 +160,7 @@ class Config(object):
             conf = dict((key, conf.get_config(key)) for key in conf.keys())
 
         for key, value in itertools.chain(iteritems(conf), iteritems(kw)):
-            if isinstance(value, dict):
+            if isinstance(value, dict) or (isinstance(value, Config) and not value.is_leaf()):
                 if key not in self._value:
                     self._value[key] = {}
                 self.get_config(key).extend(value)

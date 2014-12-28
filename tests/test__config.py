@@ -121,7 +121,13 @@ class ExtendingTest(TestCase):
         self.conf.extend(new_cfg)
         self.assertEquals(self.conf.get_config('b.c').metadata, {'x': 3})
 
-
+    def test__extend_config_preserves_nodes(self):
+        self.conf.extend(Config({"b": {"c": 2}}))
+        self.conf.extend(Config({"b": {"d": 3}}))
+        self.assertEquals(
+            self.conf.serialize_to_dict(),
+            {"a": 1, "b": {"c": 2, "d": 3}}
+        )
 
 
 class HelperMethodsTest(TestCase):
