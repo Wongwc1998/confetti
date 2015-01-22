@@ -338,7 +338,10 @@ class ConfigProxy(object):
             raise AttributeError(attr)
 
     def __getattr__(self, attr):
-        value = self._conf[attr]
+        try:
+            value = self._conf[attr]
+        except LookupError:
+            raise AttributeError(attr)
         if isinstance(value, dict):
             value = Config(value)
         if isinstance(value, Config):

@@ -25,6 +25,10 @@ class BasicUsageTest(TestCase):
     def test__get_conf_from_proxy(self):
         self.assertIs(get_config_object_from_proxy(self.conf.root), self.conf)
 
+    def test__proxy_hasattr(self):
+        self.assertFalse(hasattr(self.conf.root.a, 'c'))
+        self.assertIsNone(getattr(self.conf.root.a, 'c', None))
+
     def test__proxy_dir(self):
         self.assertEquals(dir(self.conf.root), ['a'])
         self.assertEquals(dir(self.conf.root.a), ['b'])
@@ -58,7 +62,7 @@ class BasicUsageTest(TestCase):
         self.assertTrue("b" in self.conf["a"])
 
     def test__item_not_found(self):
-        with self.assertRaises(LookupError):
+        with self.assertRaises(AttributeError):
             self.conf.root.a.c
 
     def test__keys(self):
