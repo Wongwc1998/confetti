@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from sentinels import NOTHING
 
 from . import exceptions
-from .python3_compat import iteritems, string_types
+from .python3_compat import iteritems, string_types, itervalues
 from .ref import Ref
 from .utils import coerce_leaf_value
 
@@ -19,12 +19,37 @@ class Config(object):
         self._parent = parent
         self.metadata = metadata
         self.root = ConfigProxy(self)
+        self._dirty = False
+
+    def is_dirty(self):
+        return self._dirty
+
+    def mark_dirty(self):
+        if not self._dirty:
+            self._dirty = True
+            if self._parent is not None:
+                self._parent.mark_dirty()
+
+    def mark_clean(self):
+        stack = [self]
+        while stack:
+            root = stack.pop()
+            if isinstance(root, dict):
+                stack.extend(itervalues(root))
+            elif isinstance(root, Config):
+                stack.extend(root.itervalues())
+
+            if isinstance(root, Config):
+                assert isinstance(root._dirty, bool)
+                root._dirty = False
 
     def _init_value(self, value):
         if value is NOTHING:
             value = {}
         elif isinstance(value, dict):
             value = value.copy()
+        elif isinstance(value, Config):
+            value.set_parent(self)
         return value
 
     def _fix_dictionary_value(self):
@@ -56,6 +81,7 @@ class Config(object):
             raise exceptions.CannotSetValue(
                 "Cannot set value of a non-leaf config object")
         self._value = value
+        self.mark_dirty()
 
     def is_leaf(self):
         """
@@ -75,6 +101,7 @@ class Config(object):
             else:
                 for subpath, cfg in value.traverse_leaves():
                     yield "{0}.{1}".format(key, subpath), cfg
+
 
     def __getitem__(self, item):
         """
@@ -146,6 +173,8 @@ class Config(object):
             if not isinstance(value, Config):
                 self._value[item] = Config(value, parent=self)
             self._value[item].metadata = old_metaata
+        self.mark_dirty()
+
 
     def extend(self, conf=None, **kw):
         """
@@ -209,6 +238,9 @@ class Config(object):
         Similar to ``dict.keys()`` - returns iterable of all keys in the config object
         """
         return self._value.keys()
+
+    def itervalues(self):
+        return itervalues(self._value)
 
     @classmethod
     def from_filename(cls, filename, namespace=None):
@@ -284,6 +316,11 @@ class Config(object):
         Returns the parent config object
         """
         return self._parent
+
+    def set_parent(self, parent):
+        if self._parent is not None:
+            raise RuntimeError('Config object already has a parent')
+        self._parent = parent
 
     def assign_path(self, path, value, deduce_type=False, default_type=None):
         """

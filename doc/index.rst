@@ -147,6 +147,28 @@ The default is no type deduction, which results in string values always::
  >>> c.root.a.b.c
  '230'
 
+Dirty/Clean States
+------------------
+
+ >>> cfg = Config({
+ ...    'value': 1,
+ ...    'subcfg': {
+ ...       'value': 2,
+ ...    }})
+ >>> cfg.is_dirty()
+ False
+ >>> cfg.root.subcfg.value += 1
+ >>> cfg.is_dirty()
+ True
+ >>> cfg['subcfg'].is_dirty()
+ True
+
+ >>> cfg.mark_clean()
+ >>> cfg.is_dirty()
+ False
+ >>> cfg['subcfg'].is_dirty()
+ False
+
 Cross References
 ----------------
 
