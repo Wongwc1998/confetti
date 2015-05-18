@@ -169,6 +169,16 @@ Dirty/Clean States
  >>> cfg['subcfg'].is_dirty()
  False
 
+Update Callbacks
+----------------
+
+You can register callbacks to be called after any value or subconfig is being changed::
+
+ >>> @cfg.on_update
+ ... def handle_update(config):
+ ...     assert cfg is config
+ ...     # handle the update here
+
 Cross References
 ----------------
 

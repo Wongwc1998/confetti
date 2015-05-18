@@ -20,15 +20,23 @@ class Config(object):
         self.metadata = metadata
         self.root = ConfigProxy(self)
         self._dirty = False
+        self._update_callbacks = []
+
+    def on_update(self, func):
+        self._update_callbacks.append(func)
 
     def is_dirty(self):
         return self._dirty
 
-    def mark_dirty(self):
+    def notify_update(self):
         if not self._dirty:
             self._dirty = True
-            if self._parent is not None:
-                self._parent.mark_dirty()
+
+        if self._parent is not None:
+            self._parent.notify_update()
+
+        for hook in self._update_callbacks:
+            hook(self)
 
     def mark_clean(self):
         stack = [self]
@@ -81,7 +89,7 @@ class Config(object):
             raise exceptions.CannotSetValue(
                 "Cannot set value of a non-leaf config object")
         self._value = value
-        self.mark_dirty()
+        self.notify_update()
 
     def is_leaf(self):
         """
@@ -101,7 +109,6 @@ class Config(object):
             else:
                 for subpath, cfg in value.traverse_leaves():
                     yield "{0}.{1}".format(key, subpath), cfg
-
 
     def __getitem__(self, item):
         """
@@ -173,8 +180,7 @@ class Config(object):
             if not isinstance(value, Config):
                 self._value[item] = Config(value, parent=self)
             self._value[item].metadata = old_metaata
-        self.mark_dirty()
-
+        self.notify_update()
 
     def extend(self, conf=None, **kw):
         """
