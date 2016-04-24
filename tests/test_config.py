@@ -220,7 +220,7 @@ class BackupTest(TestCase):
 
     def setUp(self):
         super(BackupTest, self).setUp()
-        self.conf = Config(dict(a=1, b=2))
+        self.conf = Config(dict(a=1, b=2, c=[]))
 
     def test__backup_context(self):
         with self.conf.backup_context():
@@ -238,6 +238,12 @@ class BackupTest(TestCase):
         self.conf.discard_backup()
         with self.assertRaises(exceptions.NoBackup):
             self.conf.restore()
+
+    def test__backup_copy(self):
+        self.conf.backup()
+        self.conf.root.c.append(0)
+        self.conf.restore()
+        self.assertEqual(self.conf.root.c, [])
 
 
 class SerializationTest(TestCase):
