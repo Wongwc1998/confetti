@@ -1,3 +1,5 @@
+import copy
+
 from contextlib import contextmanager
 
 from sentinels import NOTHING
@@ -402,7 +404,7 @@ def _get_state(config):
         for key in config.keys():
             returned[key] = _get_state(config[key])
         return returned
-    return config
+    return copy.deepcopy(config)
 
 
 def _set_state(config, state):
