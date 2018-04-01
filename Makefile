@@ -3,8 +3,6 @@ default: test
 detox-test:
 	detox
 
-travis-test: test
-
 test: env
 	.env/bin/py.test tests
 
