@@ -5,7 +5,7 @@ import doctest
 
 class DocumentationTest(TestCase):
 
-    def test__doctests(self):
+    def test_doctests(self):
         for p, _, filenames in os.walk(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "doc"))):
             for filename in filenames:
                 if not filename.endswith(".rst"):
