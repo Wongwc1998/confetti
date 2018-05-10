@@ -12,35 +12,35 @@ class PathAssignmentTest(TestCase):
     def tearDown(self):
         super(PathAssignmentTest, self).tearDown()
 
-    def test__invalid_path_assignment_to_path(self):
+    def test_invalid_path_assignment_to_path(self):
         with self.assertRaises(exceptions.InvalidPath):
             self.conf.assign_path("a.g.d", 3)
 
-    def test__invalid_path_getting(self):
+    def test_invalid_path_getting(self):
         with self.assertRaises(exceptions.InvalidPath):
             self.conf.get_path("a.g.d")
 
-    def test__get_path_direct(self):
+    def test_get_path_direct(self):
         self.assertEquals(4, self.conf.get_path("d"))
 
-    def test__path_deducing_with_none(self):
+    def test_path_deducing_with_none(self):
         self.conf.root.a.b.c = None
         self.assertIsNone(self.conf.root.a.b.c)
         with self.assertRaises(exceptions.CannotDeduceType):
             self.conf.assign_path_expression('a.b.c=2', deduce_type=True)
         self.assertIsNone(self.conf.root.a.b.c)
 
-    def test__path_assign_value_deduce_type(self):
+    def test_path_assign_value_deduce_type(self):
         self.conf.root.a.b.c = 1
         self.conf.assign_path('a.b.c', '2', deduce_type=True)
         self.assertEquals(self.conf.root.a.b.c, 2)
 
-    def test__path_deducing_with_none_force_type(self):
+    def test_path_deducing_with_none_force_type(self):
         self.conf.assign_path_expression(
             "a.b.c=2", deduce_type=True, default_type=str)
         self.assertEquals(self.conf.root.a.b.c, 2)
 
-    def test__path_deducing_with_compound_types(self):
+    def test_path_deducing_with_compound_types(self):
         for initial_value, value in [
                 ([1, 2, 3], ["a", "b", 3]),
                 ((1, 2), (3, 4, 5))
@@ -50,7 +50,7 @@ class PathAssignmentTest(TestCase):
                 "a.b={0!r}".format(value), deduce_type=True)
             self.assertEquals(self.conf["a"]["b"], value)
 
-    def test__path_deducing_with_booleans(self):
+    def test_path_deducing_with_booleans(self):
         for false_literal in ('false', 'False', 'no', 'n', 'No', 'N'):
             self.conf['a']['b']['c'] = True
             self.conf.assign_path_expression(
@@ -66,6 +66,6 @@ class PathAssignmentTest(TestCase):
                 self.conf.assign_path_expression(
                     'a.b.c={0}'.format(invalid_literal), deduce_type=True)
 
-    def test__assign_path_direct(self):
+    def test_assign_path_direct(self):
         self.conf.assign_path('d', 5)
         self.assertEquals(self.conf['d'], 5)
