@@ -397,7 +397,7 @@ class ConfigProxy(object):
 def _get_state(config):
     if isinstance(config, Config):
         if config.is_leaf():
-            return config._value
+            return copy.deepcopy(config._value)
         return _get_state(config._value)
     if isinstance(config, dict):
         returned = {}

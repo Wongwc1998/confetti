@@ -5,7 +5,7 @@ from confetti import Config, Ref
 class CrossReferencingTest(TestCase):
     VALUE = 239829382
 
-    def test__references(self):
+    def test_references(self):
         conf = Config(dict(
             a=dict(
                 b=self.VALUE,
@@ -14,7 +14,7 @@ class CrossReferencingTest(TestCase):
         )).root
         self.assertEquals(conf.a.references_b, self.VALUE)
 
-    def test__references_traversal(self):
+    def test_references_traversal(self):
         conf = Config(dict(
             a=dict(
                 a_1=dict(
