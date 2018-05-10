@@ -221,6 +221,7 @@ class BackupTest(TestCase):
     def setUp(self):
         super(BackupTest, self).setUp()
         self.conf = Config(dict(a=1, b=2, c=[]))
+        self.conf.extend(Config({'d': []}))
 
     def test_backup_context(self):
         with self.conf.backup_context():
@@ -242,8 +243,10 @@ class BackupTest(TestCase):
     def test_backup_copy(self):
         self.conf.backup()
         self.conf.root.c.append(0)
+        self.conf.root.d.extend([2, 3])
         self.conf.restore()
         self.assertEqual(self.conf.root.c, [])
+        self.assertEqual(self.conf.root.d, [])
 
 
 class SerializationTest(TestCase):
