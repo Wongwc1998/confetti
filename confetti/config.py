@@ -174,14 +174,14 @@ class Config(object):
                 "Cannot set key {0!r}".format(item))
         old_value = self._value[item]
         if isinstance(old_value, Config):
-            old_metaata = old_value.metadata
+            old_metadata = old_value.metadata
         else:
-            old_metaata = NOTHING
+            old_metadata = NOTHING
         self._value[item] = value
-        if old_metaata is not NOTHING:
+        if old_metadata is not NOTHING:
             if not isinstance(value, Config):
                 self._value[item] = Config(value, parent=self)
-            self._value[item].metadata = old_metaata
+            self._value[item].metadata = old_metadata
         self.notify_update()
 
     def extend(self, conf=None, **kw):
