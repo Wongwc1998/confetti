@@ -29,6 +29,10 @@ class BasicUsageTest(TestCase):
         self.assertFalse(hasattr(self.conf.root.a, 'c'))
         self.assertIsNone(getattr(self.conf.root.a, 'c', None))
 
+    def test_proxy_getitem(self):
+        self.assertEqual(self.conf.root.a["b"], 2)
+        self.assertRaises(KeyError, lambda: self.conf.root.a["c"])
+
     def test_proxy_dir(self):
         self.assertEquals(dir(self.conf.root), ['a'])
         self.assertEquals(dir(self.conf.root.a), ['b'])

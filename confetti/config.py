@@ -393,6 +393,9 @@ class ConfigProxy(object):
             return ConfigProxy(value)
         return value
 
+    def __getitem__(self, item):
+        return getattr(self, item)
+
 
 def _get_state(config):
     if isinstance(config, Config):
