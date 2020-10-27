@@ -393,6 +393,12 @@ class ConfigProxy(object):
             return ConfigProxy(value)
         return value
 
+    def __getitem__(self, item):
+        try:
+            return getattr(self, item)
+        except AttributeError:
+            raise KeyError(item)
+
 
 def _get_state(config):
     if isinstance(config, Config):
