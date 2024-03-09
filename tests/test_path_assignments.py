@@ -21,7 +21,7 @@ class PathAssignmentTest(TestCase):
             self.conf.get_path("a.g.d")
 
     def test_get_path_direct(self):
-        self.assertEquals(4, self.conf.get_path("d"))
+        self.assertEqual(4, self.conf.get_path("d"))
 
     def test_path_deducing_with_none(self):
         self.conf.root.a.b.c = None
@@ -33,12 +33,12 @@ class PathAssignmentTest(TestCase):
     def test_path_assign_value_deduce_type(self):
         self.conf.root.a.b.c = 1
         self.conf.assign_path('a.b.c', '2', deduce_type=True)
-        self.assertEquals(self.conf.root.a.b.c, 2)
+        self.assertEqual(self.conf.root.a.b.c, 2)
 
     def test_path_deducing_with_none_force_type(self):
         self.conf.assign_path_expression(
             "a.b.c=2", deduce_type=True, default_type=str)
-        self.assertEquals(self.conf.root.a.b.c, 2)
+        self.assertEqual(self.conf.root.a.b.c, 2)
 
     def test_path_deducing_with_compound_types(self):
         for initial_value, value in [
@@ -48,7 +48,7 @@ class PathAssignmentTest(TestCase):
             self.conf["a"]["b"] = initial_value
             self.conf.assign_path_expression(
                 "a.b={0!r}".format(value), deduce_type=True)
-            self.assertEquals(self.conf["a"]["b"], value)
+            self.assertEqual(self.conf["a"]["b"], value)
 
     def test_path_deducing_with_booleans(self):
         for false_literal in ('false', 'False', 'no', 'n', 'No', 'N'):
@@ -68,4 +68,4 @@ class PathAssignmentTest(TestCase):
 
     def test_assign_path_direct(self):
         self.conf.assign_path('d', 5)
-        self.assertEquals(self.conf['d'], 5)
+        self.assertEqual(self.conf['d'], 5)

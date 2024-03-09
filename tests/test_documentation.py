@@ -12,5 +12,5 @@ class DocumentationTest(TestCase):
                     continue
                 filename = os.path.join(p, filename)
                 result = doctest.testfile(filename, module_relative=False)
-                self.assertEquals(
+                self.assertEqual(
                     result.failed, 0, "%s tests failed!" % result.failed)

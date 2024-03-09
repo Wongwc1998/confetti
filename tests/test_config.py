@@ -16,11 +16,11 @@ class BasicUsageTest(TestCase):
         ))
 
     def test_getting(self):
-        self.assertEquals(self.conf.root.a.b, 2)
+        self.assertEqual(self.conf.root.a.b, 2)
 
     def test_setting(self):
         self.conf.root.a.b = 3
-        self.assertEquals(self.conf.root.a.b, 3)
+        self.assertEqual(self.conf.root.a.b, 3)
 
     def test_get_conf_from_proxy(self):
         self.assertIs(get_config_object_from_proxy(self.conf.root), self.conf)
@@ -34,21 +34,21 @@ class BasicUsageTest(TestCase):
         self.assertRaises(KeyError, lambda: self.conf.root.a["c"])
 
     def test_proxy_dir(self):
-        self.assertEquals(dir(self.conf.root), ['a'])
-        self.assertEquals(dir(self.conf.root.a), ['b'])
+        self.assertEqual(dir(self.conf.root), ['a'])
+        self.assertEqual(dir(self.conf.root.a), ['b'])
 
     def test_pop(self):
-        self.assertEquals(list(self.conf['a'].keys()), ['b'])
+        self.assertEqual(list(self.conf['a'].keys()), ['b'])
         self.conf['a'].pop('b')
-        self.assertEquals(list(self.conf['a'].keys()), [])
+        self.assertEqual(list(self.conf['a'].keys()), [])
 
     def test_setting_existing_paths_through_setitem(self):
         self.conf["a"]["b"] = 3
-        self.assertEquals(self.conf.root.a.b, 3)
+        self.assertEqual(self.conf.root.a.b, 3)
 
     def test_setting_existing_paths_through_assign_path(self):
         self.conf.assign_path('a.b', 3)
-        self.assertEquals(self.conf.root.a.b, 3)
+        self.assertEqual(self.conf.root.a.b, 3)
 
     def test_setting_nonexistent_paths(self):
         with self.assertRaises(exceptions.CannotSetValue):
@@ -70,7 +70,7 @@ class BasicUsageTest(TestCase):
             self.conf.root.a.c
 
     def test_keys(self):
-        self.assertEquals(set(self.conf.keys()), set(['a']))
+        self.assertEqual(set(self.conf.keys()), set(['a']))
 
 
 class ExtendingTest(TestCase):
@@ -83,11 +83,11 @@ class ExtendingTest(TestCase):
 
     def test_extend_single_value(self):
         self.conf.extend({"b": 2})
-        self.assertEquals(self.conf.root.b, 2)
+        self.assertEqual(self.conf.root.b, 2)
 
     def test_extend_keyword_arguments(self):
         self.conf.extend(b=2)
-        self.assertEquals(self.conf.root.b, 2)
+        self.assertEqual(self.conf.root.b, 2)
 
     def test_extend_structure(self):
         self.conf.extend({
@@ -97,17 +97,17 @@ class ExtendingTest(TestCase):
                 }
             }
         })
-        self.assertEquals(self.conf.root.b.c.d, 2)
+        self.assertEqual(self.conf.root.b.c.d, 2)
 
     def test_extend_structure_and_keywords(self):
         self.conf.extend({"b": 1, "c": 3}, b=2)
-        self.assertEquals(self.conf.root.b, 2)
-        self.assertEquals(self.conf.root.c, 3)
+        self.assertEqual(self.conf.root.b, 2)
+        self.assertEqual(self.conf.root.c, 3)
 
     def test_extend_preserves_nodes(self):
         self.conf.extend({"b": {"c": 2}})
         self.conf.extend({"b": {"d": 3}})
-        self.assertEquals(
+        self.assertEqual(
             self.conf.serialize_to_dict(),
             {"a": 1, "b": {"c": 2, "d": 3}}
         )
@@ -120,24 +120,24 @@ class ExtendingTest(TestCase):
                 }
             }
         }))
-        self.assertEquals(self.conf.root.b.c.d, 2)
+        self.assertEqual(self.conf.root.b.c.d, 2)
 
     def test_extend_config_propagates_changes(self):
         new_cfg = Config({'b': {'c': 2}})
         self.conf.extend(new_cfg)
-        self.assertEquals(self.conf.root.b.c, 2)
+        self.assertEqual(self.conf.root.b.c, 2)
         new_cfg.root.b.c = 3
-        self.assertEquals(self.conf.root.b.c, 3)
+        self.assertEqual(self.conf.root.b.c, 3)
 
     def test_extend_config_preserves_metadata(self):
         new_cfg = Config({'b': {'c': 2 // Metadata(x=3)}})
         self.conf.extend(new_cfg)
-        self.assertEquals(self.conf.get_config('b.c').metadata, {'x': 3})
+        self.assertEqual(self.conf.get_config('b.c').metadata, {'x': 3})
 
     def test_extend_config_preserves_nodes(self):
         self.conf.extend(Config({"b": {"c": 2}}))
         self.conf.extend(Config({"b": {"c": 2, "d": 3}}))
-        self.assertEquals(
+        self.assertEqual(
             self.conf.serialize_to_dict(),
             {"a": 1, "b": {"c": 2, "d": 3}}
         )
@@ -150,7 +150,7 @@ class ExtendingTest(TestCase):
     def test_update_config_preserves_nodes(self):
         self.conf.update(Config({"b": {"c": 2}}))
         self.conf.update(Config({"b": {"d": 3}}))
-        self.assertEquals(
+        self.assertEqual(
             self.conf.serialize_to_dict(),
             {"a": 1, "b": {"c": 2, "d": 3}}
         )
@@ -172,7 +172,7 @@ class HelperMethodsTest(TestCase):
         })
 
     def test_traverse_leaves(self):
-        self.assertEquals(
+        self.assertEqual(
             sorted((path, c.get_value())
                    for path, c in self.config.traverse_leaves()),
             [("a.b", 2), ("a.c.d", 3), ("a.e", 4), ("f", 5)])
@@ -185,7 +185,7 @@ class CopyingTest(TestCase):
         conf1 = Config(raw_conf)
         conf2 = Config(raw_conf)
         conf1["a"]["b"] += 1
-        self.assertNotEquals(conf1["a"]["b"], conf2["a"]["b"])
+        self.assertNotEqual(conf1["a"]["b"], conf2["a"]["b"])
 
 
 class LinkedConfigurationTest(TestCase):
@@ -202,22 +202,22 @@ class LinkedConfigurationTest(TestCase):
     def test_linked_backup_and_restore(self):
         self.conf1.backup()
         self.conf2['c'] = 3
-        self.assertEquals(self.conf1.root.b.c, 3)
+        self.assertEqual(self.conf1.root.b.c, 3)
         self.conf1['a'] = 2
         self.conf1.restore()
-        self.assertEquals(self.conf1.root.b.c, 2)
+        self.assertEqual(self.conf1.root.b.c, 2)
 
     def test_linked_backups_restore_parent_then_child(self):
         self.conf2.backup()
         self.conf1.backup()
         self.conf2['c'] = 4
-        self.assertEquals(self.conf2.root.c, 4)
+        self.assertEqual(self.conf2.root.c, 4)
         self.conf1.restore()
-        self.assertEquals(self.conf2.root.c, 2)
+        self.assertEqual(self.conf2.root.c, 2)
         self.conf2['c'] = 5
-        self.assertEquals(self.conf2.root.c, 5)
+        self.assertEqual(self.conf2.root.c, 5)
         self.conf2.restore()
-        self.assertEquals(self.conf2.root.c, 2)
+        self.assertEqual(self.conf2.root.c, 2)
 
 
 class BackupTest(TestCase):
@@ -269,11 +269,11 @@ class SerializationTest(TestCase):
     def test_serialization(self):
         result = self.conf.serialize_to_dict()
         self.assertIsNot(result, self.dict)
-        self.assertEquals(result, self.dict)
+        self.assertEqual(result, self.dict)
         self.assertIsNot(result['a'], self.dict['a'])
-        self.assertEquals(result['a']['b']['c'], 8)
+        self.assertEqual(result['a']['b']['c'], 8)
 
     def test_serialization_with_assignment(self):
         self.conf.assign_path("a.b.c", 9)
         result = self.conf.serialize_to_dict()
-        self.assertEquals(result['a']['b']['c'], 9)
+        self.assertEqual(result['a']['b']['c'], 9)

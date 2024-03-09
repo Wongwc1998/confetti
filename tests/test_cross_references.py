@@ -12,7 +12,7 @@ class CrossReferencingTest(TestCase):
                 references_b=Ref("b")
             )
         )).root
-        self.assertEquals(conf.a.references_b, self.VALUE)
+        self.assertEqual(conf.a.references_b, self.VALUE)
 
     def test_references_traversal(self):
         conf = Config(dict(
@@ -33,6 +33,6 @@ class CrossReferencingTest(TestCase):
                 )
             )
         )).root
-        self.assertEquals(conf.a.a_1.ref_1, conf.a.a_1.value)
-        self.assertEquals(conf.a.a_1.ref_2, conf.a.a_2.value)
-        self.assertEquals(conf.a.a_1.ref_3, conf.b.b_1.value)
+        self.assertEqual(conf.a.a_1.ref_1, conf.a.a_1.value)
+        self.assertEqual(conf.a.a_1.ref_2, conf.a.a_2.value)
+        self.assertEqual(conf.a.a_1.ref_3, conf.b.b_1.value)
