@@ -1,8 +1,12 @@
+import os
+import tempfile
+
 from .test_utils import TestCase
 from confetti import Config
 from confetti import get_config_object_from_proxy
 from confetti import exceptions
 from confetti import Metadata
+from sentinels import NOTHING
 
 
 class BasicUsageTest(TestCase):
@@ -14,6 +18,16 @@ class BasicUsageTest(TestCase):
                 b=2
             )
         ))
+
+    def test_init_with_nothing(self):
+        conf = Config(NOTHING)
+        self.assertEqual(conf.get_value(), {})
+
+    def test_init_with_config(self):
+        parent_conf = Config({"a": 1})
+        child_conf = Config(parent_conf)
+        nested_conf = child_conf.get_config("a")
+        self.assertIs(nested_conf.get_parent(), child_conf)
 
     def test_getting(self):
         self.assertEqual(self.conf.root.a.b, 2)
@@ -142,10 +156,17 @@ class ExtendingTest(TestCase):
             {"a": 1, "b": {"c": 2, "d": 3}}
         )
 
-    def test_extend_config_prevents_losing_path(self):
-        self.conf.extend(Config({"b": {"c": 2}}))
+    def test_extend_config_prevents_losing_value(self):
+        self.conf = Config({"a": 1})
+        new_cfg = Config({"a": {"b": 2}})
         with self.assertRaises(exceptions.CannotSetValue):
-            self.conf.extend(Config({"b": {"d": 3}}))
+            self.conf.extend(new_cfg)
+
+    def test_extend_config_prevents_losing_path(self):
+        self.conf = Config({"a": {"b": 1}})
+        new_cfg = Config({"a": 1})
+        with self.assertRaises(exceptions.CannotSetValue):
+            self.conf.extend(new_cfg)
 
     def test_update_config_preserves_nodes(self):
         self.conf.update(Config({"b": {"c": 2}}))
@@ -277,3 +298,62 @@ class SerializationTest(TestCase):
         self.conf.assign_path("a.b.c", 9)
         result = self.conf.serialize_to_dict()
         self.assertEqual(result['a']['b']['c'], 9)
+
+
+class ConfigInitializationTest(TestCase):
+    def test_from_filename(self):
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False) as temp_file:
+            temp_file.write('CONFIG = {"a": 1}')
+            temp_file.flush()
+
+            config = Config.from_filename(temp_file.name)
+            self.assertEqual(config.root.a, 1)
+
+        os.unlink(temp_file.name)
+
+    def test_from_file(self):
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False) as temp_file:
+            temp_file.write('CONFIG = {"b": 2}')
+            temp_file.flush()
+
+            with open(temp_file.name, "rb") as f:
+                config = Config.from_file(f, filename=temp_file.name)
+                self.assertEqual(config.root.b, 2)
+
+        os.unlink(temp_file.name)
+
+    def test_from_string(self):
+        config_str = 'CONFIG = {"c": 3}'
+        config = Config.from_string(config_str)
+        self.assertEqual(config.root.c, 3)
+
+    def test_from_string_with_namespace(self):
+        config_str = 'CONFIG = {"d": x}'
+        namespace = {"x": 4}
+        config = Config.from_string(config_str, namespace=namespace)
+        self.assertEqual(config.root.d, 4)
+
+    def test_from_file_with_namespace(self):
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False) as temp_file:
+            temp_file.write('CONFIG = {"e": y}')
+            temp_file.flush()
+
+            namespace = {"y": 5}
+            with open(temp_file.name, "rb") as f:
+                config = Config.from_file(
+                    f, filename=temp_file.name, namespace=namespace
+                )
+                self.assertEqual(config.root.e, 5)
+
+        os.unlink(temp_file.name)
+
+
+class ConfigParentTest(TestCase):
+    def test_set_parent_twice(self):
+        parent_config = Config({"a": 1})
+        child_config = Config({"b": 2})
+
+        child_config.set_parent(parent_config)
+
+        with self.assertRaises(RuntimeError):
+            child_config.set_parent(parent_config)
